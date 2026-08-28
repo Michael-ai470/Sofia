@@ -1,0 +1,31 @@
+{% extends "admin/base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<h1 style="font-size:1.6rem">Overview</h1>
+<div class="stats">
+  <div class="stat"><div class="stat__k">Users</div><div class="stat__v">{{ m.users }}</div></div>
+  <div class="stat"><div class="stat__k">Runs today</div><div class="stat__v">{{ m.jobs_today }}</div></div>
+  <div class="stat"><div class="stat__k">Failed (24h)</div><div class="stat__v">{{ m.jobs_failed }}</div></div>
+  <div class="stat"><div class="stat__k">AI spend (30d)</div><div class="stat__v" style="font-size:1.4rem">${{ '%.2f'|format(m.cost_30d or 0) }}</div></div>
+</div>
+
+{% if m.stale_rulesets %}
+  <div class="alert alert--warn">
+    <div><strong>{{ m.stale_rulesets }} rule set(s) need re-verification.</strong>
+    A tax or contract rule set past its review date must not serve user computations.
+    <a href="{{ url_for('admin.rulesets') }}">Review now</a>.</div>
+  </div>
+{% endif %}
+
+<h2 style="font-size:1.15rem;margin-top:30px">Most used tools (30 days)</h2>
+<table class="table">
+  <thead><tr><th>Tool</th><th>Runs</th><th>Failures</th><th>Credits</th></tr></thead>
+  <tbody>
+    {% for r in top_tools %}
+      <tr><td>{{ r.tool }}</td><td>{{ r.runs }}</td><td>{{ r.failures }}</td><td>{{ r.credits or 0 }}</td></tr>
+    {% else %}
+      <tr><td colspan="4" style="color:var(--ink-4)">No runs yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Choose a new password — Sofia{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1>Choose a new password</h1>
+  <form class="formcard" method="post" action="{{ url_for('auth.reset', token=token) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field">
+      <label class="label" for="password">New password</label>
+      <input class="input" id="password" type="password" name="password" required minlength="10" autofocus>
+      <div class="hint">At least 10 characters.</div>
+    </div>
+    <button class="btn btn--primary btn--block btn--lg" type="submit">Update password</button>
+  </form>
+</div>
+{% endblock %}

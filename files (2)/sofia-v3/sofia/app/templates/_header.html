@@ -1,0 +1,63 @@
+<header class="hdr">
+  <div class="hdr__in">
+    <a class="logo" href="{{ url_for('public.home') }}">
+      <span class="logo__mark">S</span>
+      <span>Sofia<span class="logo__dot">.</span></span>
+    </a>
+
+    <nav class="nav" id="nav" aria-label="Tools">
+      {% for group in nav_groups[:3] %}
+        <div class="nav__item">
+          <button class="nav__link" type="button" data-mega="mega-{{ group.id }}" aria-expanded="false" aria-controls="mega-{{ group.id }}">
+            {{ group.name }}
+            <svg class="nav__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="mega" id="mega-{{ group.id }}" data-open="false" style="grid-template-columns:repeat(1,minmax(230px,1fr))">
+            <div class="mega__col">
+              <div class="mega__head">{{ group.name }}</div>
+              {% for t in group.tools %}
+                <a class="mega__link" href="{{ url_for('public.tool', slug=t.slug) }}" {% if t.status != 'live' %}data-soon{% endif %}>{{ t.name }}</a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+      <div class="nav__item">
+        <button class="nav__link" type="button" data-mega="mega-all" aria-expanded="false" aria-controls="mega-all">
+          All tools
+          <svg class="nav__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="mega" id="mega-all" data-open="false">
+          {% for group in nav_groups %}
+            <div class="mega__col">
+              <div class="mega__head">{{ group.name }}</div>
+              {% for t in group.tools %}
+                <a class="mega__link" href="{{ url_for('public.tool', slug=t.slug) }}" {% if t.status != 'live' %}data-soon{% endif %}>{{ t.name }}</a>
+              {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <a class="nav__link" href="{{ url_for('public.pricing') }}">Pricing</a>
+    </nav>
+
+    <div class="hdr__auth">
+      {% if current_user %}
+        {# The credit counter is the natural way in to the usage page — a user
+           who clicks their balance is asking where it went. #}
+        <a class="btn btn--quiet btn--sm" href="{{ url_for('account.usage_page') }}">
+          {{ current_user.credits }} credit{{ '' if current_user.credits == 1 else 's' }}
+        </a>
+        <a class="btn btn--ghost btn--sm" href="{{ url_for('account.dashboard') }}">Account</a>
+      {% else %}
+        <a class="btn btn--quiet btn--sm" href="{{ url_for('auth.login') }}">Log in</a>
+        <a class="btn btn--primary btn--sm" href="{{ url_for('auth.signup') }}">Sign up</a>
+      {% endif %}
+      <button class="hdr__burger" id="burger" type="button" aria-label="Menu" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>

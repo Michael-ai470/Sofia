@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<h1 style="font-size:1.6rem">Users</h1>
+<form method="get" style="display:flex;gap:10px;margin-bottom:20px;max-width:460px">
+  <input class="input" type="search" name="q" value="{{ q or '' }}" placeholder="Search by email or name">
+  <button class="btn btn--ghost" type="submit">Search</button>
+</form>
+<table class="table">
+  <thead><tr><th>Email</th><th>Name</th><th>Credits</th><th>Plan</th><th>Joined</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+    {% for u in users %}
+      <tr>
+        <td>{{ u.email }}</td>
+        <td>{{ u.full_name or '—' }}</td>
+        <td>{{ u.credits }}</td>
+        <td>{{ u.plan }}</td>
+        <td>{{ u.created_at.strftime('%d %b %Y') }}</td>
+        <td>{% if u.status == 'active' %}<span class="pill pill--ok">Active</span>
+            {% else %}<span class="pill pill--err">{{ u.status|title }}</span>{% endif %}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.grant_credits') }}" style="display:flex;gap:6px">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="user_id" value="{{ u.id }}">
+            <input class="input" style="width:74px;padding:6px 8px" type="number" name="amount" placeholder="+10" required>
+            <button class="btn btn--ghost btn--sm" type="submit">Grant</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" style="color:var(--ink-4)">No users found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

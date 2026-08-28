@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Buy credits · Sofia{% endblock %}
+
+{% block content %}
+<div class="wrap wrap--wide acct">
+
+  <header class="acct__head">
+    <div>
+      <h1 class="acct__title">Buy credits</h1>
+      <p class="acct__sub">
+        You have <strong>{{ balance }}</strong> credit{{ '' if balance == 1 else 's' }}.
+        Credits never expire.
+      </p>
+    </div>
+    <a class="btn btn--quiet btn--sm" href="{{ url_for('account.usage_page') }}">
+      View usage
+    </a>
+  </header>
+
+  <section class="packs">
+    {% for p in packages %}
+      <form method="post" action="{{ url_for('account.buy') }}"
+            class="pack {% if p.popular %}pack--pop{% endif %}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="package" value="{{ p.id }}">
+
+        {% if p.popular %}<span class="pack__flag">Most popular</span>{% endif %}
+
+        <h2 class="pack__name">{{ p.label }}</h2>
+        <p class="pack__credits">{{ '{:,}'.format(p.credits) }} credits</p>
+
+        <p class="pack__price">
+          {% if p.strike %}
+            <s class="pack__strike">{{ p.strike }}</s>
+          {% endif %}
+          <span class="pack__now">{{ p.price }}</span>
+        </p>
+
+        {% if p.discount %}
+          <span class="pack__save">{{ p.discount }}% off</span>
+        {% endif %}
+
+        <p class="pack__unit">{{ p.per_credit }} per credit</p>
+        <p class="pack__blurb">{{ p.blurb }}</p>
+
+        <button class="btn {% if p.popular %}btn--primary{% else %}btn--ghost{% endif %} pack__btn"
+                type="submit">Buy {{ p.label }}</button>
+
+        <p class="pack__gw">Pays via {{ p.gateway_label }}</p>
+      </form>
+    {% endfor %}
+  </section>
+
+  <p class="packs__foot">
+    Nigerian cards and bank transfers are handled by Monnify; international
+    cards by Paystack. Sofia never sees or stores your card details.
+  </p>
+</div>
+{% endblock %}

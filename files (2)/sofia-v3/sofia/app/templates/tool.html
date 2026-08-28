@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tool.name }} — Sofia{% endblock %}
+{% block description %}{{ tool.blurb }}{% endblock %}
+
+{% block content %}
+<div class="wrap">
+  <nav class="crumb"><a href="{{ url_for('public.home') }}">All tools</a> &rsaquo; {{ tool.name }}</nav>
+
+  <div class="toolhead">
+    <span class="toolhead__icon icon--{{ tool.accent }}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ icons[tool.icon] }}"/></svg>
+    </span>
+    <h1>{{ tool.name }}</h1>
+    <p>{{ tool.blurb }}</p>
+  </div>
+</div>
+
+{% if tool.status != 'live' %}
+  <div class="wrap" style="max-width:620px;padding-bottom:70px">
+    <div class="panel" style="text-align:center">
+      <h3>This tool is still in build</h3>
+      <p style="color:var(--ink-3)">
+        {{ tool.name }} is on the roadmap. Leave your email and we will tell you the day it opens —
+        nothing else, no newsletter.
+      </p>
+      <form method="post" action="{{ url_for('public.waitlist') }}" style="display:flex;gap:10px;margin-top:18px">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="tool" value="{{ tool.slug }}">
+        <input class="input" type="email" name="email" placeholder="you@company.com" required
+               {% if current_user %}value="{{ current_user.email }}"{% endif %}>
+        <button class="btn btn--primary" type="submit">Notify me</button>
+      </form>
+    </div>
+    <p style="text-align:center;margin-top:22px">
+      <a href="{{ url_for('public.home') }}">Browse the tools that are live &rarr;</a>
+    </p>
+  </div>
+{% else %}
+  <div class="wrap">
+    <div class="tool-layout">
+      <div>
+        <form id="toolform" class="panel" data-slug="{{ tool.slug }}" data-credits="{{ tool.credits }}"
+              data-authed="{{ 'true' if current_user else 'false' }}"
+              data-free="{{ 'true' if tool.free_preview else 'false' }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+          {% for f in tool.inputs %}
+            {% if f.type in ('file_or_text', 'multifile') %}
+              <div class="field">
+                <label class="label">{{ f.label }}{% if f.required %}<span class="req">*</span>{% endif %}</label>
+                <div class="drop" data-drop data-key="{{ f.key }}" {% if f.type == 'multifile' %}data-multiple{% endif %} tabindex="0" role="button">
+                  <span class="drop__icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                  </span>
+                  <div class="drop__main">Drop {{ 'files' if f.type == 'multifile' else 'a file' }} here, or click to choose</div>
+                  <div class="drop__hint">{{ f.hint or 'PDF or Word, up to 8 MB.' }}</div>
+                  <input type="file" name="{{ f.key }}" accept=".pdf,.doc,.docx,.txt,.rtf,.md" {% if f.type == 'multifile' %}multiple{% endif %}>
+                </div>
+                <ul class="filelist" data-filelist="{{ f.key }}"></ul>
+                {% if f.type == 'file_or_text' %}
+                  <details style="margin-top:12px">
+                    <summary style="cursor:pointer;font-size:.86rem;color:var(--ink-3)">Or paste the text instead</summary>
+                    <textarea class="textarea" name="{{ f.key }}_text" rows="8" style="margin-top:10px"
+                              placeholder="Paste the full text here."></textarea>
+                  </details>
+                {% endif %}
+              </div>
+
+            {% elif f.type == 'textarea' %}
+              <div class="field">
+                <label class="label" for="f-{{ f.key }}">{{ f.label }}{% if f.required %}<span class="req">*</span>{% endif %}</label>
+                <textarea class="textarea" id="f-{{ f.key }}" name="{{ f.key }}" rows="{{ f.rows or 5 }}"
+                          {% if f.required %}required{% endif %}></textarea>
+                {% if f.hint %}<div class="hint">{{ f.hint }}</div>{% endif %}
+              </div>
+
+            {% elif f.type == 'select' %}
+              <div class="field">
+                <label class="label" for="f-{{ f.key }}">{{ f.label }}{% if f.required %}<span class="req">*</span>{% endif %}</label>
+                <select class="select" id="f-{{ f.key }}" name="{{ f.key }}" {% if f.required %}required{% endif %}>
+                  <option value="">Choose…</option>
+                  {% for o in f.options %}<option value="{{ o }}">{{ o }}</option>{% endfor %}
+                </select>
+                {% if f.hint %}<div class="hint">{{ f.hint }}</div>{% endif %}
+              </div>
+
+            {% else %}
+              <div class="field">
+                <label class="label" for="f-{{ f.key }}">{{ f.label }}{% if f.required %}<span class="req">*</span>{% endif %}</label>
+                <input class="input" id="f-{{ f.key }}" type="text" name="{{ f.key }}" {% if f.required %}required{% endif %}>
+                {% if f.hint %}<div class="hint">{{ f.hint }}</div>{% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+
+          <div id="formerror"></div>
+
+          <div style="display:flex;align-items:center;gap:14px;margin-top:22px;flex-wrap:wrap">
+            <button class="btn btn--primary btn--lg" type="submit" id="runbtn">
+              <span data-label>Run {{ tool.name }}</span>
+            </button>
+            <span class="cost">
+              {% if tool.credits == 0 %}Free — no credits used
+              {% else %}Uses {{ tool.credits }} credit{{ '' if tool.credits == 1 else 's' }}{% endif %}
+            </span>
+          </div>
+        </form>
+
+        <section class="panel result" id="result" aria-live="polite">
+          <div id="resulthead"></div>
+          <div class="result__body" id="resultbody"></div>
+          <div style="display:flex;gap:10px;margin-top:26px;padding-top:22px;border-top:1px solid var(--border);flex-wrap:wrap">
+            <button class="btn btn--ghost btn--sm" type="button" data-copy>Copy text</button>
+            <button class="btn btn--ghost btn--sm" type="button" data-download>Download .md</button>
+            <!-- Populated once a job completes. Only document results get
+                 export links; a scorecard has nothing to put in a file. -->
+            <span id="resultdownloads" style="display:contents"></span>
+            <button class="btn btn--quiet btn--sm" type="button" data-again>Run again</button>
+          </div>
+        </section>
+      </div>
+
+      <aside class="tool-side">
+        <div class="panel panel--tight">
+          <div class="panel__title">How this works</div>
+          <ol style="margin:12px 0 0;padding-left:18px;color:var(--ink-3);font-size:.87rem;line-height:1.65">
+            <li>Give Sofia the material.</li>
+            <li>It produces the document.</li>
+            <li>Anything it could not verify comes back as a marked gap for you to fill.</li>
+          </ol>
+        </div>
+
+        {% if not current_user %}
+          <div class="panel panel--tight" style="margin-top:16px;background:var(--indigo-50);border-color:var(--indigo-100)">
+            <div class="panel__title">New here?</div>
+            <p style="font-size:.87rem;color:var(--ink-2);margin:8px 0 14px">
+              {{ signup_bonus }} free credits when you create an account. No card.
+            </p>
+            <a class="btn btn--primary btn--sm btn--block" href="{{ url_for('auth.signup') }}">Create an account</a>
+          </div>
+        {% else %}
+          <div class="panel panel--tight" style="margin-top:16px">
+            <div class="stat__k">Your balance</div>
+            <div class="stat__v">{{ current_user.credits }} <small>credits</small></div>
+            <a class="btn btn--ghost btn--sm btn--block" style="margin-top:14px" href="{{ url_for('account.credits') }}">Top up</a>
+          </div>
+        {% endif %}
+
+        <div class="panel panel--tight" style="margin-top:16px">
+          <div class="panel__title">Related</div>
+          <ul class="ftr__list" style="margin-top:12px">
+            {% for r in related %}
+              <li><a href="{{ url_for('public.tool', slug=r.slug) }}">{{ r.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

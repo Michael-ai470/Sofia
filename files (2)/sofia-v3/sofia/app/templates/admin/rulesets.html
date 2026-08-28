@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+{% block title %}Rule sets{% endblock %}
+{% block content %}
+<h1 style="font-size:1.6rem">Rule sets</h1>
+<div class="alert alert--info">
+  <div>Tax and contract rules live here as versioned data, never in the model's memory.
+  A rule set with status <strong>draft</strong> is never served to a user computation —
+  only <strong>verified</strong> sets with a named practitioner and a verification date are.</div>
+</div>
+<table class="table">
+  <thead><tr><th>ID</th><th>Version</th><th>Jurisdiction</th><th>Effective</th><th>Verified</th><th>By</th><th>Status</th></tr></thead>
+  <tbody>
+    {% for r in rulesets %}
+      <tr>
+        <td><strong>{{ r.ruleset_id }}</strong></td>
+        <td>{{ r.version }}</td>
+        <td>{{ r.jurisdiction }}</td>
+        <td>{{ r.effective_from }}{% if r.effective_to %} &rarr; {{ r.effective_to }}{% endif %}</td>
+        <td>{{ r.verified_on or '—' }}</td>
+        <td style="font-size:.82rem">{{ r.verified_by or '—' }}</td>
+        <td>
+          {% if r.status == 'verified' %}<span class="pill pill--ok">Verified</span>
+          {% elif r.status == 'draft' %}<span class="pill pill--warn">Draft — not served</span>
+          {% else %}<span class="pill pill--muted">Superseded</span>{% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" style="color:var(--ink-4)">
+        No rule sets loaded. The tax engine stays disabled until a verified set exists.
+      </td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

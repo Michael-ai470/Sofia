@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Sofia — every document that decides something, in one place{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="wrap">
+    <h1>Every document that <span class="hero__accent">decides something</span>, in one place</h1>
+    <p class="hero__sub">
+      Your CV, your business plan, your proposal, your contracts, your filings. Sofia prepares each one
+      to survive the person with the authority to say no. Start free — no account needed.
+    </p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="tabs" role="tablist" aria-label="Tool categories">
+    {% for c in categories %}
+      <button class="tab" role="tab" type="button"
+              data-filter="{{ c.id }}"
+              aria-selected="{{ 'true' if loop.first else 'false' }}">{{ c.label }}</button>
+    {% endfor %}
+  </div>
+
+  <div class="grid" id="toolgrid">
+    {% for t in tools %}
+      <a class="card {% if t.status != 'live' %}card--soon{% endif %}"
+         href="{{ url_for('public.tool', slug=t.slug) }}"
+         data-category="{{ t.category }}">
+        {% if t.badge %}
+          <span class="card__ribbon badge badge--{{ t.badge|lower }}">{{ t.badge }}</span>
+        {% endif %}
+        <span class="card__icon icon--{{ t.accent }}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ icons[t.icon] }}"/></svg>
+        </span>
+        <span class="card__title">{{ t.name }}</span>
+        <span class="card__blurb">{{ t.blurb }}</span>
+        <span class="card__foot">
+          {% if t.status != 'live' %}
+            <span class="cost">Coming soon</span>
+          {% elif t.credits == 0 %}
+            <span class="cost cost--free">Free</span>
+          {% else %}
+            <span class="cost">{{ t.credits }} credit{{ '' if t.credits == 1 else 's' }}</span>
+          {% endif %}
+        </span>
+      </a>
+    {% endfor %}
+  </div>
+
+  <p class="empty" id="noresults" style="display:none">
+    <strong>Nothing here yet.</strong><br>These tools are still in build. Try another category.
+  </p>
+</div>
+
+<section class="band band--tint">
+  <div class="wrap">
+    <h2 style="text-align:center;margin-bottom:8px">Why Sofia is different</h2>
+    <p style="text-align:center;color:var(--ink-3);max-width:58ch;margin:0 auto 34px">
+      Most AI writing tools optimise for sounding good. Sofia optimises for being right when someone checks.
+    </p>
+    <div class="band__grid">
+      <div class="band__item">
+        <h3>It will not invent a number</h3>
+        <p>Every figure is either something you supplied, something derived with the arithmetic shown, or a visible gap marked for you to fill. Sofia never fills a blank with something plausible.</p>
+      </div>
+      <div class="band__item">
+        <h3>It shows its working</h3>
+        <p>Computations are line by line. Claims cite their source. Every document ends with a register of what it assumed and what would break if the assumption is wrong.</p>
+      </div>
+      <div class="band__item">
+        <h3>It knows where it stops</h3>
+        <p>Sofia prepares documents. It does not file your return, sign your contract, or act as your lawyer — and it tells you plainly when you need someone who can.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap" style="text-align:center">
+    <h2>Start with a free CV analysis</h2>
+    <p style="color:var(--ink-3);max-width:52ch;margin:0 auto 24px">
+      No account, no card. See your score and the three things costing you interviews, then decide.
+    </p>
+    <a class="btn btn--primary btn--lg" href="{{ url_for('public.tool', slug='cv-analysis') }}">Analyse my CV</a>
+  </div>
+</section>
+{% endblock %}

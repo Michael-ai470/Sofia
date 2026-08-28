@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Contact — Sofia{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1>Get in touch</h1>
+  <p class="narrow__sub">Questions, problems, or something Sofia got wrong. We read everything.</p>
+  <form class="formcard" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field">
+      <label class="label" for="name">Your name</label>
+      <input class="input" id="name" type="text" name="name" required
+             {% if current_user %}value="{{ current_user.full_name or '' }}"{% endif %}>
+    </div>
+    <div class="field">
+      <label class="label" for="email">Email</label>
+      <input class="input" id="email" type="email" name="email" required
+             {% if current_user %}value="{{ current_user.email }}"{% endif %}>
+    </div>
+    <div class="field">
+      <label class="label" for="subject">Subject</label>
+      <input class="input" id="subject" type="text" name="subject">
+    </div>
+    <div class="field">
+      <label class="label" for="body">Message</label>
+      <textarea class="textarea" id="body" name="body" rows="6" required></textarea>
+    </div>
+    <button class="btn btn--primary btn--block btn--lg" type="submit">Send message</button>
+  </form>
+</div>
+{% endblock %}

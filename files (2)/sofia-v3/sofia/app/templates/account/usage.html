@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Credit usage · Sofia{% endblock %}
+
+{% block content %}
+<div class="wrap wrap--wide acct">
+
+  <header class="acct__head">
+    <div>
+      <h1 class="acct__title">Credit usage</h1>
+      <p class="acct__sub">Where your credits went over the last {{ days }} days.</p>
+    </div>
+    <nav class="seg" aria-label="Time range">
+      {% for option in [7, 30, 90] %}
+        <a class="seg__item {% if days == option %}is-on{% endif %}"
+           href="{{ url_for('account.usage_page', days=option) }}">{{ option }}d</a>
+      {% endfor %}
+    </nav>
+  </header>
+
+  {# ---- headline numbers ------------------------------------------------ #}
+  <section class="stats" aria-label="Summary">
+    <div class="stat stat--accent">
+      <span class="stat__label">Balance</span>
+      <span class="stat__value">{{ summary.balance }}</span>
+      <span class="stat__foot">
+        {% if summary.runway_days is not none %}
+          about {{ summary.runway_days }} days left at your current rate
+        {% else %}
+          credits available
+        {% endif %}
+      </span>
+    </div>
+
+    <div class="stat">
+      <span class="stat__label">Spent</span>
+      <span class="stat__value">{{ summary.spent }}</span>
+      <span class="stat__foot">{{ summary.per_day }} per day average</span>
+    </div>
+
+    <div class="stat">
+      <span class="stat__label">Documents</span>
+      <span class="stat__value">{{ summary.succeeded }}</span>
+      <span class="stat__foot">
+        {% if summary.refunded %}
+          {{ summary.refunded }} refunded
+        {% else %}
+          from {{ summary.runs }} run{{ '' if summary.runs == 1 else 's' }}
+        {% endif %}
+      </span>
+    </div>
+
+    <div class="stat">
+      <span class="stat__label">Top up</span>
+      <a class="btn btn--primary btn--sm stat__cta"
+         href="{{ url_for('account.credits') }}">Buy credits</a>
+      <span class="stat__foot">from ₦20 per credit</span>
+    </div>
+  </section>
+
+  {% if summary.runs == 0 %}
+    {# Empty state. A dashboard of zeroes tells a new user nothing; a route
+       into the product tells them what to do next. #}
+    <section class="panel empty">
+      <h2 class="empty__title">Nothing to show yet</h2>
+      <p class="empty__body">
+        Once you run a tool, this page shows what each document cost, how fast
+        you are spending, and how long your balance will last.
+      </p>
+      <a class="btn btn--primary" href="{{ url_for('public.home') }}">Browse the tools</a>
+    </section>
+
+  {% else %}
+
+    {# ---- daily spend ---------------------------------------------------- #}
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Daily spend</h2>
+        <span class="panel__note">credits per day</span>
+      </div>
+      <div class="spark" id="spark" data-daily="{{ daily_json|e }}"
+           role="img" aria-label="Credits spent per day over {{ days }} days"></div>
+    </section>
+
+    <div class="split">
+      {# ---- by engine --------------------------------------------------- #}
+      <section class="panel">
+        <div class="panel__head"><h2 class="panel__title">By category</h2></div>
+        <ul class="bars">
+          {% for row in by_engine %}
+            <li class="bars__row">
+              <div class="bars__top">
+                <span class="bars__name">{{ row.label }}</span>
+                <span class="bars__val">{{ row.credits }}</span>
+              </div>
+              <div class="bars__track">
+                <div class="bars__fill bars__fill--{{ row.accent }}"
+                     style="width: {{ row.share }}%"></div>
+              </div>
+              <span class="bars__meta">
+                {{ row.runs }} run{{ '' if row.runs == 1 else 's' }} · {{ row.share }}%
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      {# ---- by tool ----------------------------------------------------- #}
+      <section class="panel">
+        <div class="panel__head"><h2 class="panel__title">By tool</h2></div>
+        <table class="tbl">
+          <thead>
+            <tr><th>Tool</th><th class="num">Runs</th><th class="num">Credits</th></tr>
+          </thead>
+          <tbody>
+            {% for row in by_tool %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('public.tool', slug=row.slug) }}">{{ row.name }}</a>
+                  <span class="tbl__sub">{{ row.engine_label }}</span>
+                </td>
+                <td class="num">{{ row.runs }}</td>
+                <td class="num"><strong>{{ row.credits }}</strong></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    {# ---- ledger --------------------------------------------------------- #}
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Activity</h2>
+        <span class="panel__note">every credit movement, newest first</span>
+      </div>
+      <ul class="ledger">
+        {% for entry in ledger %}
+          <li class="ledger__row">
+            <span class="ledger__dot ledger__dot--{{ entry.kind }}" aria-hidden="true"></span>
+            <span class="ledger__label">
+              {% if entry.job_id %}
+                <a href="{{ url_for('account.job', public_id=entry.job_id) }}">{{ entry.label }}</a>
+              {% else %}
+                {{ entry.label }}
+              {% endif %}
+            </span>
+            <span class="ledger__at">{{ entry.at.strftime('%d %b, %H:%M') }}</span>
+            <span class="ledger__delta {% if entry.delta > 0 %}is-plus{% endif %}">
+              {{ '+' if entry.delta > 0 }}{{ entry.delta }}
+            </span>
+            <span class="ledger__bal">{{ entry.balance_after }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* Inline SVG sparkline. No chart library — this is one series of small
+   integers, and a 90 KB dependency to draw twelve bars is not a trade
+   worth making on a page people open on mobile data. */
+(function () {
+  var host = document.getElementById("spark");
+  if (!host) return;
+
+  var data;
+  try { data = JSON.parse(host.getAttribute("data-daily")); }
+  catch (e) { return; }
+  if (!data || !data.length) return;
+
+  var peak = Math.max.apply(null, data.map(function (d) { return d.credits; }));
+  var W = 100, H = 30, gap = 0.6;
+  var barW = (W / data.length) - gap;
+
+  var bars = data.map(function (d, i) {
+    /* Zero-spend days still get a faint 1-unit stub, so the axis reads as a
+       continuous timeline rather than a series with holes in it. */
+    var h = peak > 0 ? (d.credits / peak) * (H - 2) : 0;
+    if (h < 0.8) h = 0.8;
+    var x = i * (barW + gap);
+    var label = d.credits + (d.credits === 1 ? " credit" : " credits") + " on " + d.date;
+    return '<rect x="' + x.toFixed(2) + '" y="' + (H - h).toFixed(2) +
+           '" width="' + barW.toFixed(2) + '" height="' + h.toFixed(2) +
+           '" rx="0.4" class="spark__bar' + (d.credits ? '' : ' is-zero') +
+           '"><title>' + label + '</title></rect>';
+  }).join("");
+
+  host.innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" ' +
+    'class="spark__svg">' + bars + '</svg>' +
+    '<div class="spark__axis"><span>' + data[0].date.slice(5) +
+    '</span><span>peak ' + peak + '</span><span>' +
+    data[data.length - 1].date.slice(5) + '</span></div>';
+})();
+</script>
+{% endblock %}

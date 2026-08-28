@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Create your account — Sofia{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1>Create your account</h1>
+  <p class="narrow__sub">{{ signup_bonus }} credits to start. No card required.</p>
+  <form class="formcard" method="post" action="{{ url_for('auth.signup') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="next" value="{{ next_url or '' }}">
+    <div class="field">
+      <label class="label" for="full_name">Full name</label>
+      <input class="input" id="full_name" type="text" name="full_name" required autocomplete="name" autofocus>
+    </div>
+    <div class="field">
+      <label class="label" for="email">Email</label>
+      <input class="input" id="email" type="email" name="email" required autocomplete="email">
+    </div>
+    <div class="field">
+      <label class="label" for="password">Password</label>
+      <input class="input" id="password" type="password" name="password" required minlength="10" autocomplete="new-password">
+      <div class="hint">At least 10 characters. Longer beats complicated.</div>
+    </div>
+    <div class="field">
+      <label class="label" for="country">Country</label>
+      <select class="select" id="country" name="country">
+        <option value="NG" selected>Nigeria</option>
+        <option value="GH">Ghana</option>
+        <option value="KE">Kenya</option>
+        <option value="ZA">South Africa</option>
+        <option value="GB">United Kingdom</option>
+        <option value="US">United States</option>
+        <option value="XX">Elsewhere</option>
+      </select>
+    </div>
+    <button class="btn btn--primary btn--block btn--lg" type="submit" style="margin-top:6px">Create account</button>
+    <p style="font-size:.78rem;color:var(--ink-4);text-align:center;margin:14px 0 0">
+      By signing up you agree to our <a href="{{ url_for('public.page', slug='terms') }}">Terms</a>
+      and <a href="{{ url_for('public.page', slug='privacy') }}">Privacy Policy</a>.
+    </p>
+  </form>
+  <p class="formfoot">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+</div>
+{% endblock %}

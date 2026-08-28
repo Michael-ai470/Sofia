@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+{% block title %}Tool runs{% endblock %}
+{% block content %}
+<h1 style="font-size:1.6rem">Tool runs</h1>
+<table class="table">
+  <thead><tr><th>When</th><th>Tool</th><th>User</th><th>Model</th><th>Tokens</th><th>Cost</th><th>Status</th></tr></thead>
+  <tbody>
+    {% for j in jobs %}
+      <tr>
+        <td>{{ j.created_at.strftime('%d %b %H:%M') }}</td>
+        <td>{{ j.tool }}</td>
+        <td>{{ j.email or 'anonymous' }}</td>
+        <td style="font-size:.8rem;color:var(--ink-4)">{{ j.model or '—' }}</td>
+        <td style="font-size:.8rem">{{ j.tokens_in or 0 }} / {{ j.tokens_out or 0 }}</td>
+        <td>{{ '$%.4f'|format(j.cost_usd) if j.cost_usd else '—' }}</td>
+        <td>
+          {% if j.status == 'succeeded' %}<span class="pill pill--ok">Done</span>
+          {% elif j.status == 'refunded' %}<span class="pill pill--warn">Refunded</span>
+          {% elif j.status == 'failed' %}<span class="pill pill--err" title="{{ j.error_code }}">Failed</span>
+          {% else %}<span class="pill pill--muted">{{ j.status|title }}</span>{% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" style="color:var(--ink-4)">No runs yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,55 @@
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__grid">
+      <div class="ftr__brand">
+        <a class="logo" href="{{ url_for('public.home') }}">
+          <span class="logo__mark">S</span>
+          <span>Sofia<span class="logo__dot">.</span></span>
+        </a>
+        <p>AI tools for the documents that decide things — your job, your funding, your contracts, your filings.</p>
+      </div>
+
+      <div>
+        <div class="ftr__head">Career</div>
+        <ul class="ftr__list">
+          {% for t in nav_groups[0].tools[:5] %}
+            <li><a href="{{ url_for('public.tool', slug=t.slug) }}">{{ t.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div>
+        <div class="ftr__head">Business</div>
+        <ul class="ftr__list">
+          {% for t in nav_groups[2].tools[:5] %}
+            <li><a href="{{ url_for('public.tool', slug=t.slug) }}">{{ t.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div>
+        <div class="ftr__head">Product</div>
+        <ul class="ftr__list">
+          <li><a href="{{ url_for('public.home') }}">All tools</a></li>
+          <li><a href="{{ url_for('public.pricing') }}">Pricing</a></li>
+          <li><a href="{{ url_for('public.page', slug='security') }}">Security</a></li>
+          <li><a href="{{ url_for('public.contact') }}">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="ftr__head">Legal</div>
+        <ul class="ftr__list">
+          <li><a href="{{ url_for('public.page', slug='terms') }}">Terms</a></li>
+          <li><a href="{{ url_for('public.page', slug='privacy') }}">Privacy</a></li>
+          <li><a href="{{ url_for('public.page', slug='disclaimer') }}">Disclaimer</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ftr__bottom">
+      <span>&copy; {{ current_year }} Sofia. All rights reserved.</span>
+      <span>Sofia prepares documents. It does not provide legal, tax or financial advice.</span>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>{% block title %}Admin{% endblock %} — Sofia</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sofia.css') }}?v={{ asset_version }}">
+</head><body style="display:block">
+<div class="admin">
+  <aside class="admin__side">
+    <div class="admin__brand">Sofia <span style="color:var(--amber-500)">admin</span></div>
+    <nav class="admin__nav">
+      <a href="{{ url_for('admin.dashboard') }}" class="{{ 'is-active' if active == 'dashboard' }}">Overview</a>
+      <a href="{{ url_for('admin.users') }}" class="{{ 'is-active' if active == 'users' }}">Users</a>
+      <a href="{{ url_for('admin.jobs') }}" class="{{ 'is-active' if active == 'jobs' }}">Tool runs</a>
+      <a href="{{ url_for('admin.rulesets') }}" class="{{ 'is-active' if active == 'rulesets' }}">Rule sets</a>
+      <a href="{{ url_for('admin.logout') }}" style="margin-top:14px">Sign out</a>
+    </nav>
+  </aside>
+  <main class="admin__main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}<div class="alert alert--{{ category }}">{{ message }}</div>{% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body></html>

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Reset your password — Sofia{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1>Reset your password</h1>
+  <p class="narrow__sub">We will email you a link. It works once and expires in an hour.</p>
+  <form class="formcard" method="post" action="{{ url_for('auth.forgot') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field">
+      <label class="label" for="email">Email</label>
+      <input class="input" id="email" type="email" name="email" required autofocus>
+    </div>
+    <button class="btn btn--primary btn--block btn--lg" type="submit">Send reset link</button>
+  </form>
+  <p class="formfoot"><a href="{{ url_for('auth.login') }}">Back to log in</a></p>
+</div>
+{% endblock %}

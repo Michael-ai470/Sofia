@@ -1,0 +1,19 @@
+# Sofia — Python dependencies
+# Target: Python 3.11.x (cPanel).  pip install -r requirements.txt
+
+Flask==3.0.3
+Werkzeug==3.0.3
+Jinja2==3.1.4
+
+# Database — mysql-connector, NOT psycopg2. This stack is MySQL/MariaDB.
+mysql-connector-python==8.4.0
+
+# Moonshot / Kimi is OpenAI-compatible, so the OpenAI SDK is the client.
+openai==1.40.0
+
+# Document text extraction
+pypdf==4.3.1
+python-docx==1.1.2
+
+# Document export (used by the export service)
+reportlab==4.2.2
