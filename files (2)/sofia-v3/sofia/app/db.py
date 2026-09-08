@@ -134,12 +134,12 @@ def init_db() -> None:
             cur.execute("SELECT 1 AS ok")
             cur.fetchone()
             cur.execute(
-                "SELECT table_name FROM information_schema.tables "
+                "SELECT table_name AS tbl_name FROM information_schema.tables "
                 "WHERE table_schema = %s",
                 (Config.DB_NAME,),
             )
             present = {
-                (r["table_name"] if isinstance(r, dict) else r[0]).lower()
+                (r["tbl_name"] if isinstance(r, dict) else r[0]).lower()
                 for r in (cur.fetchall() or [])
             }
     except MySQLError as exc:
