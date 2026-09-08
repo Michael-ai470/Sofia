@@ -1,0 +1,17 @@
+2026-09-04 00:06:10,170 ERROR   sofia: Database check failed: Cannot reach MySQL at localhost:3306 as 'sofiang_Sofia' on database 'sofiang_Sofia'. Driver said: 2003: Can't connect to MySQL server on 'localhost:3306' (10061 No connection could be made because the target machine actively refused it)
+2026-09-04 00:06:12,278 INFO    sofia: Sofia ready (env=development, debug=False)
+ * Tip: There are .env or .flaskenv files present. Do "pip install python-dotenv" to use them.
+ * Serving Flask app 'app'
+ * Debug mode: off
+2026-09-04 00:06:12,437 INFO    werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.20.163.121:5000
+2026-09-04 00:06:12,438 INFO    werkzeug: [33mPress CTRL+C to quit[0m
+2026-09-04 00:06:27,634 INFO    werkzeug: 127.0.0.1 - - [04/Sep/2026 00:06:27] "GET / HTTP/1.1" 200 -
+2026-09-04 00:06:29,797 INFO    werkzeug: 127.0.0.1 - - [04/Sep/2026 00:06:29] "[35m[1mGET /health HTTP/1.1[0m" 503 -
+2026-09-04 00:06:31,961 INFO    werkzeug: 127.0.0.1 - - [04/Sep/2026 00:06:31] "[35m[1mGET /health HTTP/1.1[0m" 503 -
+2026-09-04 00:10:20,916 INFO    werkzeug: 127.0.0.1 - - [04/Sep/2026 00:10:20] "[35m[1mGET /health HTTP/1.1[0m" 503 -
+2026-09-04 00:10:21,143 INFO    werkzeug: 127.0.0.1 - - [04/Sep/2026 00:10:21] "GET / HTTP/1.1" 200 -
+2026-09-04 00:10:21,432 INFO    werkzeug: 127.0.0.1 - - [04/Sep/2026 00:10:21] "GET /auth/signup HTTP/1.1" 200 -
+2026-09-04 00:10:59,868 INFO    werkzeug: 127.0.0.1 - - [04/Sep/2026 00:10:59] "[35m[1mGET /health HTTP/1.1[0m" 503 -
