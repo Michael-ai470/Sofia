@@ -12,7 +12,7 @@
       <div class="band__item" style="text-align:center">
         <div class="stat__k">{{ p.label }}</div>
         <div class="stat__v" style="margin:10px 0 4px">{{ p.credits }} <small>credits</small></div>
-        <p style="font-size:1.2rem;font-weight:600;margin:6px 0 6px">{{ p.display_price }}</p>
+        <p style="font-size:1.2rem;font-weight:600;margin:6px 0 6px">{{ p.price }}</p>
         <p style="font-size:.82rem;color:var(--ink-4);margin-bottom:18px">{{ p.per_credit }} per credit</p>
         <a class="btn btn--primary btn--block" href="{{ url_for('account.credits') }}">Get {{ p.label }}</a>
       </div>

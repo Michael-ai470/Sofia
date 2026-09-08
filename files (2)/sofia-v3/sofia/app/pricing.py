@@ -53,16 +53,6 @@ PACKAGES = [
         "blurb": "For teams producing plans, proposals and recruitment "
                  "documents month after month.",
     },
-    {
-        "id": "business-1000",
-        "label": "Business 1000",
-        "credits": 1000,
-        "strike_minor": 3_500_000,    # ₦35,000
-        "amount_minor": 2_000_000,    # ₦20,000
-        "tier": "business",
-        "blurb": "Highest volume. Same rate per credit as Business 500, "
-                 "with twice the runway.",
-    },
 ]
 
 FREE_SIGNUP_CREDITS = 3
