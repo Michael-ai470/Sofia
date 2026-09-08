@@ -9,6 +9,7 @@ from app import catalog
 from app.auth_service import client_ip, rate_limited, validate_email
 from app.db import execute
 from app import pricing as pricing_data
+from app import testimonials as testimonials_data
 from config import Config
 
 bp = Blueprint("public", __name__)
@@ -20,7 +21,12 @@ def _packages():
 
 @bp.route("/")
 def home():
-    return render_template("index.html", tools=catalog.TOOLS)
+    return render_template(
+        "index.html",
+        tools=catalog.TOOLS,
+        packages=_packages(),
+        testimonial_columns=testimonials_data.columns(10),
+    )
 
 
 @bp.route("/tool/<slug>")

@@ -101,6 +101,40 @@
     } catch (e) { /* ignore */ }
   }
 
+  /* ----------------------------------------------------- testimonials --- */
+  /* The wall holds still while there is still something new in it. Once
+     the reader has reached the foot of it, the columns start creeping to
+     bring the rest through.
+
+     The motion itself is CSS, paused until this class lands, so there is
+     no JS animation loop here to drift out of step with the paint. */
+  function initTestimonials() {
+    var wall = $("[data-testimonials]");
+    if (!wall) return;
+
+    var cue = $(".tm__cue", wall);
+    if (!cue) return;
+
+    function start() { wall.classList.add("is-rolling"); }
+
+    /* Someone who has asked for less motion gets a wall that never
+       starts. The stylesheet also drops the duplicated half and hands
+       back normal scrolling. */
+    var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (still && still.matches) return;
+
+    if (!("IntersectionObserver" in window)) { start(); return; }
+
+    var seen = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        start();
+        seen.disconnect();
+      });
+    });
+    seen.observe(cue);
+  }
+
   /* -------------------------------------------------------- dropzones --- */
   var FILES = {};
 
@@ -442,6 +476,7 @@
   document.addEventListener("DOMContentLoaded", function () {
     initNav();
     initFilters();
+    initTestimonials();
     initDropzones();
     initToolForm();
     initActions();
