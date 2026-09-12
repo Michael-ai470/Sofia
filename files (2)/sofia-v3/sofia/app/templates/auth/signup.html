@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Create your account — Sofia{% endblock %}
+{% from "_back.html" import back %}
 {% block content %}
 <div class="narrow">
+  {{ back(url_for('public.home'), 'all tools') }}
   <h1>Create your account</h1>
   <p class="narrow__sub">{{ signup_bonus }} credits to start. No card required.</p>
   <form class="formcard" method="post" action="{{ url_for('auth.signup') }}">

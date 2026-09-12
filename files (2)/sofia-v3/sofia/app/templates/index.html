@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Sofia — every document that decides something, in one place{% endblock %}
+{% from "_plans.html" import plans with context %}
 
 {% block content %}
 <section class="hero">
@@ -55,47 +56,43 @@
 
 {#  Testimonials.
 
-    Four columns of ten, all ten in view, full width of the page. The
-    wall is still until the reader reaches the foot of it, at which point
-    sofia.js adds .is-rolling and the columns creep upward.
+    Four columns of ten, inside .wrap like every other section. The wall
+    is still until the reader reaches the foot of it; then sofia.js adds
+    .is-rolling and the columns creep upward.
 
-    Each column carries its ten cards twice. The second copy sits out of
-    flow directly beneath the first, so it adds nothing to the height of
-    the wall while the wall is still, and the animation travels exactly
-    one column so the loop has no visible seam. That copy is aria-hidden:
-    it is scenery for the loop, and a screen reader should hear each
-    person once.  #}
+    Each column carries its ten cards twice. The second copy is
+    aria-hidden: it is scenery for the loop, and a screen reader should
+    hear each person once. Spacing lives entirely in sofia.css.  #}
 {% macro stars(rating) %}
-  <div class="stars" role="img" aria-label="Rated {{ rating }} out of 5">
-    {% for i in range(1, 6) %}
-      <svg viewBox="0 0 24 24" class="{{ 'is-on' if i <= rating else 'is-off' }}" aria-hidden="true">
-        <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z"/>
-      </svg>
-    {% endfor %}
-  </div>
+<div class="stars" role="img" aria-label="Rated {{ rating }} out of 5">
+  {%- for i in range(1, 6) %}
+  <svg viewBox="0 0 24 24" class="{{ 'is-on' if i <= rating else 'is-off' }}" aria-hidden="true">
+    <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z"/>
+  </svg>
+  {%- endfor %}
+</div>
 {% endmacro %}
 
-{% macro testimonial_half(group) %}
-    {% for t in group %}
-    <figure class="tmc">
-      <div class="tmc__head">
-        <div class="tmc__avatar tmc__avatar--{{ t.accent }}">
-          {% if t.avatar %}
-            <img src="{{ url_for('static', filename='img/avatars/' ~ t.avatar) }}"
-                 alt="{{ t.name }}" width="40" height="40" loading="lazy">
-          {% else %}
-            <span>{{ t.initials }}</span>
-          {% endif %}
-        </div>
-        <figcaption class="tmc__who">
-          <div class="tmc__name">{{ t.name }}</div>
-          <div class="tmc__role">{{ t.role }}</div>
-        </figcaption>
-      </div>
-      {{ stars(t.rating) }}
-      <blockquote class="tmc__quote">{{ t.quote }}</blockquote>
-    </figure>
-    {% endfor %}
+{% macro cards(group) %}
+{%- for t in group %}
+<figure class="tmc">
+  <div class="tmc__head">
+    <div class="tmc__avatar tmc__avatar--{{ t.accent }}">
+      {%- if t.avatar -%}
+        <img src="{{ url_for('static', filename='img/avatars/' ~ t.avatar) }}" alt="{{ t.name }}" width="40" height="40" loading="lazy">
+      {%- else -%}
+        <span>{{ t.initials }}</span>
+      {%- endif -%}
+    </div>
+    <figcaption class="tmc__who">
+      <div class="tmc__name">{{ t.name }}</div>
+      <div class="tmc__role">{{ t.role }}</div>
+    </figcaption>
+  </div>
+  {{ stars(t.rating) }}
+  <blockquote class="tmc__quote">{{ t.quote }}</blockquote>
+</figure>
+{%- endfor %}
 {% endmacro %}
 
 <section class="band band--soft">
@@ -104,47 +101,23 @@
     <p style="text-align:center;color:var(--ink-3);max-width:58ch;margin:0 auto 34px">
       Students, recruiters, founders and career changers on what actually changed for them.
     </p>
-  </div>
 
-  {#  Outside .wrap on purpose: the wall runs the full width of the page. #}
-  <div class="tm" data-testimonials>
-    <div class="tm__viewport">
-      <div class="tm__grid">
-        {% for group in testimonial_columns %}
+    <div class="tm" data-testimonials>
+      <div class="tm__viewport">
+        <div class="tm__grid">
+          {%- for group in testimonial_columns %}
           <div class="tm__col">
             <div class="tm__stack">
-              <div class="tm__half">{{ testimonial_half(group) }}</div>
-              <div class="tm__half" aria-hidden="true">{{ testimonial_half(group) }}</div>
+              <div class="tm__half">{{ cards(group) }}</div>
+              <div class="tm__half" aria-hidden="true">{{ cards(group) }}</div>
             </div>
           </div>
-        {% endfor %}
+          {%- endfor %}
+        </div>
       </div>
-    </div>
-    {#  Crossing this line means the whole wall has been seen, which is
-        the cue to start moving.  #}
-    <div class="tm__cue" aria-hidden="true"></div>
-  </div>
-</section>
-
-<section class="band band--tint">
-  <div class="wrap">
-    <h2 style="text-align:center;margin-bottom:8px">Why Sofia is different</h2>
-    <p style="text-align:center;color:var(--ink-3);max-width:58ch;margin:0 auto 34px">
-      Most AI writing tools optimise for sounding good. Sofia optimises for being right when someone checks.
-    </p>
-    <div class="band__grid">
-      <div class="band__item">
-        <h3>It will not invent a number</h3>
-        <p>Every figure is either something you supplied, something derived with the arithmetic shown, or a visible gap marked for you to fill. Sofia never fills a blank with something plausible.</p>
-      </div>
-      <div class="band__item">
-        <h3>It shows its working</h3>
-        <p>Computations are line by line. Claims cite their source. Every document ends with a register of what it assumed and what would break if the assumption is wrong.</p>
-      </div>
-      <div class="band__item">
-        <h3>It knows where it stops</h3>
-        <p>Sofia prepares documents. It does not file your return, sign your contract, or act as your lawyer — and it tells you plainly when you need someone who can.</p>
-      </div>
+      {#  Crossing this line means the whole wall has been seen: the cue
+          for sofia.js to start it moving.  #}
+      <div class="tm__cue" aria-hidden="true"></div>
     </div>
   </div>
 </section>
@@ -160,23 +133,13 @@
 </section>
 
 <section class="band band--tint">
-  <div class="wrap" style="max-width:960px">
+  <div class="wrap" style="max-width:1080px">
     <h2 style="text-align:center">Pay for what you use</h2>
     <p style="text-align:center;color:var(--ink-3);max-width:56ch;margin:0 auto 40px;font-size:1.05rem">
       No subscription. Credits never expire. Analysis is free, so you can see the quality before you spend anything.
     </p>
 
-    <div class="band__grid">
-      {% for p in packages %}
-        <div class="band__item" style="text-align:center">
-          <div class="stat__k">{{ p.label }}</div>
-          <div class="stat__v" style="margin:10px 0 4px">{{ p.credits }} <small>credits</small></div>
-          <p style="font-size:1.2rem;font-weight:600;margin:6px 0 6px">{{ p.price }}</p>
-          <p style="font-size:.82rem;color:var(--ink-4);margin-bottom:18px">{{ p.per_credit }} per credit</p>
-          <a class="btn btn--primary btn--block" href="{{ url_for('account.credits') }}">Get {{ p.label }}</a>
-        </div>
-      {% endfor %}
-    </div>
+    {{ plans(tiers) }}
   </div>
 </section>
 {% endblock %}

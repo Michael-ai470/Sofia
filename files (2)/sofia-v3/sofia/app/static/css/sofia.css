@@ -217,10 +217,34 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 2rem 0; }
 .cost { font-size: .76rem; color: var(--ink-4); font-weight: 500; }
 .cost--free { color: var(--ok); font-weight: 600; }
 
-/* ------------------------------------------------------------ tool page -- */
-.crumb { padding: 22px 0 0; font-size: .84rem; color: var(--ink-4); }
-.crumb a { color: var(--ink-3); }
+/* ------------------------------------------------------------ back link -- */
+/* Rendered by the back() macro in _back.html. Same spot on every inner
+   page: top left, above the title. Bordered so it reads as a control and
+   not body text, but small and neutral so it never competes with the h1. */
+.backbar { padding: 22px 0 0; margin-bottom: 18px; }
+.back {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 15px 8px 11px; border-radius: 999px;
+  border: 1px solid var(--border-strong); background: var(--surface);
+  color: var(--ink-2); font-size: .86rem; font-weight: 600; line-height: 1.2;
+  transition: border-color .15s var(--ease), color .15s var(--ease), background .15s var(--ease);
+}
+.back svg {
+  width: 16px; height: 16px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  transition: transform .18s var(--ease);
+}
+.back:hover { text-decoration: none; border-color: var(--indigo-500); color: var(--indigo-600); background: var(--indigo-50); }
+.back:hover svg { transform: translateX(-2px); }
+.back:focus-visible { outline: 2px solid var(--indigo-500); outline-offset: 2px; }
 
+/* Narrow forms already carry their own top padding. */
+.narrow .backbar { padding-top: 0; margin-bottom: 26px; }
+/* Account pages: the header below sets its own gap, so trim the overlap. */
+.acct .backbar { padding-top: 28px; margin-bottom: 0; }
+.acct .backbar + .acct__head { margin-top: 18px; }
+
+/* ------------------------------------------------------------ tool page -- */
 .toolhead { text-align: center; padding: 26px 0 34px; }
 .toolhead__icon { width: 60px; height: 60px; border-radius: 16px; margin: 0 auto 18px; display: grid; place-items: center; }
 .toolhead__icon svg { width: 29px; height: 29px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -528,6 +552,38 @@ main { flex: 1 0 auto; }
   .ledger__bal { display: none; }
 }
 
+/* -------------------------------------------------- public pricing cards -- */
+/* Rendered by plans() in _plans.html on the pricing page and the homepage.
+   Flex column with the list taking the slack, so the buttons sit on one
+   baseline however many lines each card has. */
+.plans { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.plan {
+  position: relative; display: flex; flex-direction: column;
+  padding: 26px 22px 22px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-lg);
+}
+.plan--pop { border-color: var(--indigo-500); box-shadow: 0 0 0 1px var(--indigo-500); }
+.plan__flag {
+  position: absolute; top: -11px; left: 22px;
+  background: var(--indigo-500); color: #fff;
+  font-size: .66rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 999px;
+}
+.plan__name { font-size: .74rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-4); }
+.plan__tag { color: var(--indigo-600); font-weight: 600; font-size: .93rem; margin-top: 6px; }
+.plan__price { font-family: var(--font-display); font-size: 2.1rem; font-weight: 700; letter-spacing: -.02em; line-height: 1; margin-top: 14px; }
+.plan__meta { font-size: .82rem; color: var(--ink-4); margin-top: 8px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.plan__list { list-style: none; margin: 18px 0 22px; padding: 0; display: grid; gap: 10px; flex: 1; align-content: start; }
+.plan__list li { display: flex; gap: 9px; align-items: flex-start; font-size: .88rem; color: var(--ink-2); line-height: 1.45; }
+.plan__list svg {
+  width: 16px; height: 16px; flex: none; margin-top: 2px;
+  fill: none; stroke: var(--ok); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+}
+.plan__btn { margin-top: auto; }
+
+@media (max-width: 1000px) { .plans { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px)  { .plans { grid-template-columns: minmax(0, 1fr); } }
+
 /* -- credit packages -- */
 .packs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 8px 0 18px; }
 .pack {
@@ -558,41 +614,38 @@ main { flex: 1 0 auto; }
 @media (max-width: 900px) { .packs { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .packs { grid-template-columns: 1fr; } }
 
+
 /* =========================================================================
-   Testimonials — four columns of ten, all in view, full width
+   Testimonials — four columns of ten
 
-   Every card in a column is visible while the wall is still. Nothing
-   moves until the reader reaches the foot of it, at which point sofia.js
-   adds .is-rolling to .tm and the columns start creeping upward. Nobody
-   loses their place mid-sentence.
+   Sits inside .wrap so it lines up with every other section. One gutter
+   token, --tm-gap, is the only spacing in the wall: between columns,
+   between stacked cards, and at the loop seam. Change it in one place.
 
-   Loop without adding height. Each column carries its ten cards twice,
-   but the second copy is absolutely positioned one gutter beneath the
-   first, so it takes no room in the layout: the wall is exactly as tall
-   as ten cards while it is still, and the copy only comes into view
-   once things are moving. The animation travels exactly one column plus
-   one gutter, which is precisely where the copy begins, so the two meet
-   invisibly with no snap back.
+   Every margin inside a card is set to zero on purpose. The cards are
+   <figure> elements and browsers give those margin: 1em 40px by default,
+   which once inflated the gutters to 56px tall and 104px wide while the
+   token said 24. Nothing in here relies on a browser default.
 
-   Columns are stretched to a common height and the top copy fills it, so
-   a slightly shorter stack does not show its duplicate early. The Python
-   side balances the columns to within a line or two, so that slack is
-   small.
+   Still until read. The wall does not move while there is still something
+   new in it. sofia.js adds .is-rolling once the reader reaches the foot,
+   and only then do the columns creep upward.
 
-   Columns run at four slightly different speeds. Identical speeds make
-   the whole wall move as one slab, which looks mechanical.
+   Loop without adding height. Each column carries its ten cards twice.
+   The copy is absolutely positioned one gutter below the first, so it
+   takes no room while the wall is still, and the animation travels
+   exactly one column plus one gutter, which is precisely where the copy
+   begins. The two meet with no visible seam.
+
+   Columns are stretched to a common height and the first copy fills it,
+   so a slightly shorter stack does not reveal its duplicate early. The
+   Python side balances columns to within a line or two.
    ========================================================================= */
 .band--soft { background: var(--raised); }
 
-.tm {
-  --tm-gap: 38px;                /* about a centimetre */
-  position: relative;
-  padding: 0 24px;               /* full width, cards kept off the edge */
-}
+.tm { --tm-gap: 24px; position: relative; }
 
 .tm__viewport { position: relative; overflow: hidden; }
-/* While still, nothing is cut off, so no fade. Once it is moving both
-   edges are mid-card, so soften them. */
 .tm.is-rolling .tm__viewport {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 90px, #000 calc(100% - 90px), transparent 100%);
           mask-image: linear-gradient(to bottom, transparent 0, #000 90px, #000 calc(100% - 90px), transparent 100%);
@@ -605,7 +658,7 @@ main { flex: 1 0 auto; }
   align-items: stretch;
 }
 
-.tm__col { display: flex; flex-direction: column; }
+.tm__col { display: flex; flex-direction: column; min-width: 0; }
 
 .tm__stack {
   position: relative;
@@ -620,15 +673,12 @@ main { flex: 1 0 auto; }
 .tm__viewport:hover .tm__stack,
 .tm__viewport:focus-within .tm__stack { animation-play-state: paused; }
 
+/* Four slightly different speeds; one speed moves as a single slab. */
 .tm__col:nth-child(2) .tm__stack { animation-duration: 104s; }
 .tm__col:nth-child(3) .tm__stack { animation-duration: 84s; }
 .tm__col:nth-child(4) .tm__stack { animation-duration: 97s; }
 
-.tm__half {
-  display: flex;
-  flex-direction: column;
-  gap: var(--tm-gap);
-}
+.tm__half { display: flex; flex-direction: column; gap: var(--tm-gap); }
 .tm__half:first-child { flex: 1; }
 .tm__half[aria-hidden="true"] {
   position: absolute;
@@ -641,14 +691,15 @@ main { flex: 1 0 auto; }
   to   { transform: translateY(calc(-100% - var(--tm-gap))); }
 }
 
+/* ---- card ---- */
 .tmc {
+  margin: 0;
+  padding: 18px 20px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 18px 20px;
 }
-.tmc__head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-
+.tmc__head { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; }
 .tmc__avatar {
   width: 40px; height: 40px; border-radius: 50%; flex: none;
   display: grid; place-items: center; overflow: hidden;
@@ -662,14 +713,11 @@ main { flex: 1 0 auto; }
 .tmc__avatar--violet { background: var(--violet-50); color: var(--violet-500); }
 .tmc__avatar--rose   { background: var(--rose-50);   color: var(--rose-500); }
 .tmc__avatar--slate  { background: var(--slate-50);  color: var(--slate-500); }
+.tmc__who  { flex: 1; min-width: 0; margin: 0; }
+.tmc__name { margin: 0; font-weight: 600; font-size: .93rem; line-height: 1.3; }
+.tmc__role { margin: 0; color: var(--ink-4); font-size: .79rem; line-height: 1.3; }
+.tmc__quote { margin: 0; padding: 0; color: var(--ink-2); font-size: .92rem; line-height: 1.6; }
 
-.tmc__who { flex: 1; min-width: 0; }
-.tmc__name { font-weight: 600; font-size: .93rem; line-height: 1.3; }
-.tmc__role { color: var(--ink-4); font-size: .79rem; line-height: 1.3; }
-.tmc__quote { margin: 0; color: var(--ink-2); font-size: .92rem; line-height: 1.6; }
-
-/* Stars get a line of their own beneath the name, so a long name that
-   wraps never runs into them. */
 .stars { display: flex; gap: 2px; margin: 0 0 10px; }
 .stars svg { width: 14px; height: 14px; display: block; }
 .stars .is-on  { fill: var(--amber-500); }
@@ -677,21 +725,19 @@ main { flex: 1 0 auto; }
 
 @media (max-width: 1100px) {
   .tm__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  /* Only two stacks are on screen, so reuse the two nearest speeds. */
   .tm__col:nth-child(3) .tm__stack { animation-duration: 90s; }
   .tm__col:nth-child(4) .tm__stack { animation-duration: 104s; }
 }
-
 @media (max-width: 600px) {
-  .tm { --tm-gap: 22px; padding: 0 16px; }
+  .tm { --tm-gap: 18px; }
   .tm__grid { grid-template-columns: minmax(0, 1fr); }
   .tmc { padding: 16px 17px; }
 }
 
-/* Motion off: stop the travel and drop the duplicate copy so nothing is
-   read twice. The wall is already fully in view, so nothing else to do. */
+/* Motion off: never roll, and drop the duplicate copy so nothing is read
+   twice. The wall is already fully in view, so there is nothing else. */
 @media (prefers-reduced-motion: reduce) {
-  .tm__stack { animation-name: none !important; }
+  .tm__stack { animation: none !important; }
   .tm__half[aria-hidden="true"] { display: none; }
   .tm__viewport { -webkit-mask-image: none; mask-image: none; }
 }

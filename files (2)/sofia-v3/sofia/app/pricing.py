@@ -25,6 +25,7 @@ PACKAGES = [
     {
         "id": "starter",
         "label": "Starter",
+        "tagline": "A full application cycle",
         "credits": 50,
         "strike_minor": 480_000,      # ₦4,800
         "amount_minor": 250_000,      # ₦2,500
@@ -35,6 +36,7 @@ PACKAGES = [
     {
         "id": "pro",
         "label": "Pro",
+        "tagline": "Several documents at once",
         "credits": 200,
         "strike_minor": 1_000_000,    # ₦10,000
         "amount_minor": 450_000,      # ₦4,500
@@ -46,6 +48,7 @@ PACKAGES = [
     {
         "id": "business-500",
         "label": "Business 500",
+        "tagline": "For teams, month after month",
         "credits": 500,
         "strike_minor": 1_800_000,    # ₦18,000
         "amount_minor": 1_000_000,    # ₦10,000
@@ -56,6 +59,19 @@ PACKAGES = [
 ]
 
 FREE_SIGNUP_CREDITS = 3
+
+# The free tier is a card on the pricing page, not a package. It is kept
+# out of PACKAGES on purpose: that list is what checkout, the gateways and
+# the ledger reason about, and none of them should ever meet an amount of
+# zero. Nothing here is purchasable; it describes the signup grant.
+FREE_TIER = {
+    "id": "free",
+    "label": "Free",
+    "tagline": "Try 3 documents",
+    "credits": FREE_SIGNUP_CREDITS,
+    "amount_minor": 0,
+    "tier": "free",
+}
 
 
 def package(package_id: str) -> dict | None:
@@ -146,8 +162,84 @@ def for_display(country: str | None = None) -> list[dict]:
             "per_credit": naira(per_credit_minor(pkg)),
             "gateway": gateway,
             "gateway_label": GATEWAYS[gateway]["label"],
+            "features": features(pkg),
         })
     return out
+
+
+# --------------------------------------------------------------------------- #
+#  Feature lines for the pricing cards
+# --------------------------------------------------------------------------- #
+# Any package can run any tool; credits are credits. So these lines describe
+# what each size realistically covers, not what it unlocks. The counts are
+# computed from the live costs in catalog.py so a change to what a rewrite
+# costs is reflected on the pricing page without anyone remembering to edit
+# it here. Every tier gets the two lines that are true of all of them first,
+# then what grows as the size does.
+def _cost(slug: str) -> int:
+    from app import catalog
+    return catalog.credit_cost(slug)
+
+
+def _base_lines(pkg: dict) -> list[str]:
+    return [
+        f"{pkg['credits']} credits, never expire",
+        "Works across all three engines",
+    ]
+
+
+def features(pkg: dict) -> list[str]:
+    tier = pkg["tier"]
+    credits = pkg["credits"]
+
+    if tier == "free":
+        return [
+            f"{credits} credits, no card required",
+            "Works across all three engines",
+            "Unlimited free CV analysis",
+            "Enough for one full CV rewrite",
+        ]
+
+    if tier == "starter":
+        return _base_lines(pkg) + [
+            "CV rewrites, cover letters & interview prep",
+            f"Around {credits // _cost('cv-rewrite')} CV rewrites, "
+            f"or {credits // _cost('cover-letter')} cover letters",
+        ]
+
+    if tier == "pro":
+        return _base_lines(pkg) + [
+            "Everything in Starter",
+            "Recruiter batch ranking, up to 20 CVs a run",
+            "Proposals, grant applications & pitch decks",
+        ]
+
+    # business
+    return _base_lines(pkg) + [
+        "Everything in Pro",
+        "Full business plans, document review & partner research",
+        f"Rank up to {credits // _cost('rank-candidates')} candidate CVs",
+    ]
+
+
+def tiers(country: str | None = None) -> list[dict]:
+    """
+    Every card on the public pricing page: the free tier first, then the
+    packages. Only the marketing pages use this. The buy page and checkout
+    use for_display(), which knows nothing about the free tier — there is
+    nothing to buy there.
+    """
+    free = {
+        **FREE_TIER,
+        "price": naira(0),
+        "meta": f"{FREE_TIER['credits']} credits · included on signup",
+        "features": features(FREE_TIER),
+    }
+    paid = [
+        {**pkg, "meta": f"{pkg['credits']} credits · {pkg['per_credit']} per credit"}
+        for pkg in for_display(country)
+    ]
+    return [free] + paid
 
 
 # --------------------------------------------------------------------------- #

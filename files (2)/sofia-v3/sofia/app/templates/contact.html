@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Contact — Sofia{% endblock %}
+{% from "_back.html" import back %}
 {% block content %}
 <div class="narrow">
+  {{ back(url_for('public.home'), 'all tools') }}
   <h1>Get in touch</h1>
   <p class="narrow__sub">Questions, problems, or something Sofia got wrong. We read everything.</p>
   <form class="formcard" method="post">

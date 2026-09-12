@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ tool_name }} — Sofia{% endblock %}
+{% from "_back.html" import back %}
 {% block content %}
 <div class="wrap" style="max-width:860px;padding-bottom:70px">
-  <nav class="crumb"><a href="{{ url_for('account.dashboard') }}">Account</a> &rsaquo; {{ tool_name }}</nav>
-  <h1 style="font-size:1.7rem;margin-top:18px">{{ tool_name }}</h1>
+  {{ back(url_for('account.dashboard'), 'your account') }}
+  <h1 style="font-size:1.7rem">{{ tool_name }}</h1>
   <p style="color:var(--ink-3)">Created {{ job.created_at.strftime('%d %B %Y at %H:%M') }}</p>
   <section class="panel">
     <div class="result__body" id="resultbody" data-payload='{{ payload_json }}'></div>

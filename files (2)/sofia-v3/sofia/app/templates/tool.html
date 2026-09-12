@@ -3,9 +3,10 @@
 {% block title %}{{ tool.name }} — Sofia{% endblock %}
 {% block description %}{{ tool.blurb }}{% endblock %}
 
+{% from "_back.html" import back %}
 {% block content %}
 <div class="wrap">
-  <nav class="crumb"><a href="{{ url_for('public.home') }}">All tools</a> &rsaquo; {{ tool.name }}</nav>
+  {{ back(url_for('public.home'), 'all tools') }}
 
   <div class="toolhead">
     <span class="toolhead__icon icon--{{ tool.accent }}">

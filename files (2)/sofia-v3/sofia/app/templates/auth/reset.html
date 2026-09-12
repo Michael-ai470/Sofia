@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Choose a new password — Sofia{% endblock %}
+{% from "_back.html" import back %}
 {% block content %}
 <div class="narrow">
+  {{ back(url_for('auth.login'), 'log in') }}
   <h1>Choose a new password</h1>
   <form class="formcard" method="post" action="{{ url_for('auth.reset', token=token) }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">

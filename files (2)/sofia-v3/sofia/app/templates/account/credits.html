@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Buy credits · Sofia{% endblock %}
 
+{% from "_back.html" import back %}
 {% block content %}
 <div class="wrap wrap--wide acct">
+  {{ back(url_for('account.dashboard'), 'your account') }}
 
   <header class="acct__head">
     <div>

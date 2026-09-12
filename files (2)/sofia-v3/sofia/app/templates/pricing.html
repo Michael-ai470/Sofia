@@ -1,23 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Pricing — Sofia{% endblock %}
+{% from "_back.html" import back %}
+{% from "_plans.html" import plans with context %}
 {% block content %}
-<div class="wrap" style="max-width:960px;padding:52px 20px 76px">
+<div class="wrap" style="max-width:1080px;padding:0 20px 76px">
+  {{ back(url_for('public.home'), 'all tools') }}
   <h1 style="text-align:center">Pay for what you use</h1>
   <p style="text-align:center;color:var(--ink-3);max-width:56ch;margin:0 auto 40px;font-size:1.05rem">
     No subscription. Credits never expire. Analysis is free, so you can see the quality before you spend anything.
   </p>
 
-  <div class="band__grid">
-    {% for p in packages %}
-      <div class="band__item" style="text-align:center">
-        <div class="stat__k">{{ p.label }}</div>
-        <div class="stat__v" style="margin:10px 0 4px">{{ p.credits }} <small>credits</small></div>
-        <p style="font-size:1.2rem;font-weight:600;margin:6px 0 6px">{{ p.price }}</p>
-        <p style="font-size:.82rem;color:var(--ink-4);margin-bottom:18px">{{ p.per_credit }} per credit</p>
-        <a class="btn btn--primary btn--block" href="{{ url_for('account.credits') }}">Get {{ p.label }}</a>
-      </div>
-    {% endfor %}
-  </div>
+  {{ plans(tiers) }}
 
   <h2 style="margin-top:56px;font-size:1.35rem">What each tool costs</h2>
   <table class="table" style="margin-top:16px">

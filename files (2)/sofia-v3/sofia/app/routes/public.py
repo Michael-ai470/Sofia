@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flask import (Blueprint, abort, flash, redirect, render_template,
+from flask import (Blueprint, abort, flash, g, redirect, render_template,
                    request, url_for)
 
 from app import catalog
@@ -15,8 +15,12 @@ from config import Config
 bp = Blueprint("public", __name__)
 
 
-def _packages():
-    return pricing_data.for_display()
+def _tiers():
+    """Free tier plus packages, for the public pricing cards. The buy page
+    uses pricing.for_display() directly, which has no free tier."""
+    return pricing_data.tiers(
+        g.current_user.get("country") if getattr(g, "current_user", None) else None
+    )
 
 
 @bp.route("/")
@@ -24,7 +28,7 @@ def home():
     return render_template(
         "index.html",
         tools=catalog.TOOLS,
-        packages=_packages(),
+        tiers=_tiers(),
         testimonial_columns=testimonials_data.columns(10),
     )
 
@@ -45,7 +49,7 @@ def tool(slug):
 
 @bp.route("/pricing")
 def pricing():
-    return render_template("pricing.html", packages=_packages(), tools=catalog.TOOLS)
+    return render_template("pricing.html", tiers=_tiers(), tools=catalog.TOOLS)
 
 
 @bp.route("/contact", methods=["GET", "POST"])

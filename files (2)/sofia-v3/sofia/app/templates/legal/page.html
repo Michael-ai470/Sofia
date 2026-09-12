@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{{ page.title }} — Sofia{% endblock %}
+{% from "_back.html" import back %}
 {% block content %}
-<div class="wrap" style="max-width:760px;padding:44px 20px 76px">
+<div class="wrap" style="max-width:760px;padding:0 20px 76px">
+  {{ back(url_for('public.home'), 'all tools') }}
   <h1>{{ page.title }}</h1>
   <p style="color:var(--ink-4);font-size:.87rem">Last updated {{ page.updated }}</p>
   <div class="result__body" style="margin-top:26px">{{ page.body|safe }}</div>

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Log in — Sofia{% endblock %}
+{% from "_back.html" import back %}
 {% block content %}
 <div class="narrow">
+  {{ back(url_for('public.home'), 'all tools') }}
   <h1>Welcome back</h1>
   <p class="narrow__sub">Log in to pick up where you left off.</p>
   <form class="formcard" method="post" action="{{ url_for('auth.login') }}">
