@@ -471,19 +471,38 @@ def for_display() -> list[dict]:
     ]
 
 
-def columns(per_column: int = 3) -> list[list[dict]]:
+def columns(per_column: int = 10) -> list[list[dict]]:
     """
-    Group the testimonials into the vertical stacks the homepage slides
-    sideways. Twenty four entries at three apiece gives eight full columns
-    with nothing left over.
+    Split the testimonials into the vertical stacks on the homepage, with
+    the stacks balanced for height.
 
-    The running order in TESTIMONIALS already alternates short and long
-    quotes, so consecutive groups of three come out close in height and
-    the bottom edge of the row stays roughly even. If you add entries,
-    keep that alternation rather than appending every long one at the end.
+    The wall shows every card in a column at once, so if one column ran
+    long the others would trail off with empty space under them. Each
+    quote is placed longest-first into whichever column is currently
+    shortest and still has room, which lands the four totals within a
+    line or two of each other. Inside a column the entries then go back
+    to their running order from TESTIMONIALS, so the rhythm of short and
+    long is kept and the top of a stack is not all the long ones.
+
+    Height is estimated from quote length plus a flat allowance for the
+    name, stars and padding. It only needs to be close.
     """
     rows = for_display()
-    return [rows[i:i + per_column] for i in range(0, len(rows), per_column)]
+    if not rows:
+        return []
+    count = -(-len(rows) // per_column)          # ceil
+    card_chrome = 180                            # chars-worth of fixed header
+
+    cols: list[list[dict]] = [[] for _ in range(count)]
+    heights = [0] * count
+    for row in sorted(rows, key=lambda r: len(r["quote"]), reverse=True):
+        room = [i for i in range(count) if len(cols[i]) < per_column]
+        target = min(room, key=lambda i: heights[i])
+        cols[target].append(row)
+        heights[target] += len(row["quote"]) + card_chrome
+
+    order = {r["name"]: i for i, r in enumerate(rows)}
+    return [sorted(col, key=lambda r: order[r["name"]]) for col in cols]
 
 
 def average_rating() -> float:

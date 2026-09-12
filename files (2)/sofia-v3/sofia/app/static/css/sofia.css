@@ -242,8 +242,15 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 2rem 0; }
   cursor: pointer; transition: border-color .16s var(--ease), background .16s var(--ease);
 }
 .drop:hover, .drop.is-over { border-color: var(--indigo-500); background: var(--indigo-50); }
-.drop__icon { width: 44px; height: 44px; margin: 0 auto 12px; color: var(--indigo-500); }
-.drop__icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+/* The icon wrapper is a <span>; it has to be block-level or the width and
+   height below are ignored and the SVG, which has no size of its own, grows
+   to fill the whole dropzone. */
+.drop__icon {
+  display: grid; place-items: center;
+  width: 40px; height: 40px; margin: 0 auto 12px;
+  border-radius: 50%; background: var(--indigo-50); color: var(--indigo-500);
+}
+.drop__icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .drop__main { font-weight: 600; margin-bottom: 3px; }
 .drop__hint { color: var(--ink-4); font-size: .84rem; }
 .drop input[type="file"] { display: none; }
@@ -552,36 +559,40 @@ main { flex: 1 0 auto; }
 @media (max-width: 520px) { .packs { grid-template-columns: 1fr; } }
 
 /* =========================================================================
-   Testimonials — a dense wall, four columns of ten
+   Testimonials — four columns of ten, all in view, full width
 
-   It sits still while there is still something new to read. Only once the
-   reader reaches the foot of the wall do the columns start creeping
-   upward to bring the rest through, which is what the .is-rolling class
-   on .tm switches on. Nothing moves before then, so nobody loses their
-   place in a sentence.
+   Every card in a column is visible while the wall is still. Nothing
+   moves until the reader reaches the foot of it, at which point sofia.js
+   adds .is-rolling to .tm and the columns start creeping upward. Nobody
+   loses their place mid-sentence.
 
-   Each column holds its ten cards twice and travels exactly -50%, which
-   is precisely one half, so the two meet invisibly with no snap back.
-   The halves are flex columns with `gap` plus a matching padding-bottom:
-   that trailing space is load-bearing, because without it the seam would
-   be one gutter tighter than every other join and would read as a hiccup
-   once a loop.
+   Loop without adding height. Each column carries its ten cards twice,
+   but the second copy is absolutely positioned one gutter beneath the
+   first, so it takes no room in the layout: the wall is exactly as tall
+   as ten cards while it is still, and the copy only comes into view
+   once things are moving. The animation travels exactly one column plus
+   one gutter, which is precisely where the copy begins, so the two meet
+   invisibly with no snap back.
+
+   Columns are stretched to a common height and the top copy fills it, so
+   a slightly shorter stack does not show its duplicate early. The Python
+   side balances the columns to within a line or two, so that slack is
+   small.
 
    Columns run at four slightly different speeds. Identical speeds make
    the whole wall move as one slab, which looks mechanical.
    ========================================================================= */
 .band--soft { background: var(--raised); }
 
-.tm { --tm-gap: 10px; position: relative; }
-
-.tm__viewport {
+.tm {
+  --tm-gap: 38px;                /* about a centimetre */
   position: relative;
-  height: 960px;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 90px), transparent 100%);
-          mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 90px), transparent 100%);
+  padding: 0 24px;               /* full width, cards kept off the edge */
 }
-/* Once it is moving, the top edge is mid-card too, so soften both. */
+
+.tm__viewport { position: relative; overflow: hidden; }
+/* While still, nothing is cut off, so no fade. Once it is moving both
+   edges are mid-card, so soften them. */
 .tm.is-rolling .tm__viewport {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 90px, #000 calc(100% - 90px), transparent 100%);
           mask-image: linear-gradient(to bottom, transparent 0, #000 90px, #000 calc(100% - 90px), transparent 100%);
@@ -591,10 +602,14 @@ main { flex: 1 0 auto; }
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--tm-gap);
-  align-items: start;
+  align-items: stretch;
 }
 
+.tm__col { display: flex; flex-direction: column; }
+
 .tm__stack {
+  position: relative;
+  flex: 1;
   display: flex;
   flex-direction: column;
   animation: tm-roll 90s linear infinite;
@@ -613,26 +628,31 @@ main { flex: 1 0 auto; }
   display: flex;
   flex-direction: column;
   gap: var(--tm-gap);
-  padding-bottom: var(--tm-gap);
+}
+.tm__half:first-child { flex: 1; }
+.tm__half[aria-hidden="true"] {
+  position: absolute;
+  top: calc(100% + var(--tm-gap));
+  left: 0; right: 0;
 }
 
 @keyframes tm-roll {
   from { transform: translateY(0); }
-  to   { transform: translateY(-50%); }
+  to   { transform: translateY(calc(-100% - var(--tm-gap))); }
 }
 
 .tmc {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 15px 16px;
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
 }
-.tmc__head { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.tmc__head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 
 .tmc__avatar {
-  width: 36px; height: 36px; border-radius: 50%; flex: none;
+  width: 40px; height: 40px; border-radius: 50%; flex: none;
   display: grid; place-items: center; overflow: hidden;
-  font-family: var(--font-display); font-weight: 700; font-size: .8rem;
+  font-family: var(--font-display); font-weight: 700; font-size: .86rem;
   background: var(--raised); color: var(--ink-3);
 }
 .tmc__avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -644,36 +664,34 @@ main { flex: 1 0 auto; }
 .tmc__avatar--slate  { background: var(--slate-50);  color: var(--slate-500); }
 
 .tmc__who { flex: 1; min-width: 0; }
-.tmc__name { font-weight: 600; font-size: .87rem; line-height: 1.3; }
-.tmc__role { color: var(--ink-4); font-size: .75rem; line-height: 1.3; }
-.tmc__quote { margin: 0; color: var(--ink-2); font-size: .86rem; line-height: 1.55; }
+.tmc__name { font-weight: 600; font-size: .93rem; line-height: 1.3; }
+.tmc__role { color: var(--ink-4); font-size: .79rem; line-height: 1.3; }
+.tmc__quote { margin: 0; color: var(--ink-2); font-size: .92rem; line-height: 1.6; }
 
-.stars { display: flex; gap: 1px; flex: none; align-self: flex-start; margin-top: 2px; }
-.stars svg { width: 12px; height: 12px; display: block; }
+/* Stars get a line of their own beneath the name, so a long name that
+   wraps never runs into them. */
+.stars { display: flex; gap: 2px; margin: 0 0 10px; }
+.stars svg { width: 14px; height: 14px; display: block; }
 .stars .is-on  { fill: var(--amber-500); }
 .stars .is-off { fill: var(--border-strong); }
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
   .tm__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .tm__viewport { height: 820px; }
   /* Only two stacks are on screen, so reuse the two nearest speeds. */
   .tm__col:nth-child(3) .tm__stack { animation-duration: 90s; }
   .tm__col:nth-child(4) .tm__stack { animation-duration: 104s; }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 600px) {
+  .tm { --tm-gap: 22px; padding: 0 16px; }
   .tm__grid { grid-template-columns: minmax(0, 1fr); }
-  .tm__viewport { height: 680px; }
-  .tmc { padding: 14px 15px; }
+  .tmc { padding: 16px 17px; }
 }
 
-/* Motion off: stop the travel, drop the duplicate half so nothing is read
-   twice, and hand the scrolling back to the reader. */
+/* Motion off: stop the travel and drop the duplicate copy so nothing is
+   read twice. The wall is already fully in view, so nothing else to do. */
 @media (prefers-reduced-motion: reduce) {
   .tm__stack { animation-name: none !important; }
   .tm__half[aria-hidden="true"] { display: none; }
-  .tm__viewport {
-    height: auto; max-height: 900px; overflow-y: auto;
-    -webkit-mask-image: none; mask-image: none;
-  }
+  .tm__viewport { -webkit-mask-image: none; mask-image: none; }
 }

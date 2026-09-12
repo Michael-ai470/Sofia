@@ -55,14 +55,16 @@
 
 {#  Testimonials.
 
-    Four columns of ten. The wall is still until the reader reaches the
-    foot of it, at which point sofia.js adds .is-rolling and the columns
-    creep upward to bring the rest through.
+    Four columns of ten, all ten in view, full width of the page. The
+    wall is still until the reader reaches the foot of it, at which point
+    sofia.js adds .is-rolling and the columns creep upward.
 
-    Each column holds its ten cards twice. The animation travels exactly
-    -50%, which is one half, so the loop has no visible seam. The second
-    half is aria-hidden: it is scenery for the loop, and a screen reader
-    should hear each person once.  #}
+    Each column carries its ten cards twice. The second copy sits out of
+    flow directly beneath the first, so it adds nothing to the height of
+    the wall while the wall is still, and the animation travels exactly
+    one column so the loop has no visible seam. That copy is aria-hidden:
+    it is scenery for the loop, and a screen reader should hear each
+    person once.  #}
 {% macro stars(rating) %}
   <div class="stars" role="img" aria-label="Rated {{ rating }} out of 5">
     {% for i in range(1, 6) %}
@@ -89,8 +91,8 @@
           <div class="tmc__name">{{ t.name }}</div>
           <div class="tmc__role">{{ t.role }}</div>
         </figcaption>
-        {{ stars(t.rating) }}
       </div>
+      {{ stars(t.rating) }}
       <blockquote class="tmc__quote">{{ t.quote }}</blockquote>
     </figure>
     {% endfor %}
@@ -102,24 +104,25 @@
     <p style="text-align:center;color:var(--ink-3);max-width:58ch;margin:0 auto 34px">
       Students, recruiters, founders and career changers on what actually changed for them.
     </p>
+  </div>
 
-    <div class="tm" data-testimonials>
-      <div class="tm__viewport">
-        <div class="tm__grid">
-          {% for group in testimonial_columns %}
-            <div class="tm__col">
-              <div class="tm__stack">
-                <div class="tm__half">{{ testimonial_half(group) }}</div>
-                <div class="tm__half" aria-hidden="true">{{ testimonial_half(group) }}</div>
-              </div>
+  {#  Outside .wrap on purpose: the wall runs the full width of the page. #}
+  <div class="tm" data-testimonials>
+    <div class="tm__viewport">
+      <div class="tm__grid">
+        {% for group in testimonial_columns %}
+          <div class="tm__col">
+            <div class="tm__stack">
+              <div class="tm__half">{{ testimonial_half(group) }}</div>
+              <div class="tm__half" aria-hidden="true">{{ testimonial_half(group) }}</div>
             </div>
-          {% endfor %}
-        </div>
+          </div>
+        {% endfor %}
       </div>
-      {#  Crossing this line means the whole wall has been seen, which is
-          the cue to start moving.  #}
-      <div class="tm__cue" aria-hidden="true"></div>
     </div>
+    {#  Crossing this line means the whole wall has been seen, which is
+        the cue to start moving.  #}
+    <div class="tm__cue" aria-hidden="true"></div>
   </div>
 </section>
 
